@@ -1,0 +1,35 @@
+server:
+  port: 8081
+  servlet:
+    encoding:
+      charset: utf-8
+      force: true
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:test;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  h2:
+    console:
+        enabled: true
+  jpa:
+    open-in-view: false
+    hibernate:
+        ddl-auto: create
+    properties:
+        '[hibernate.default.batch.fetch.size]': 100
+        '[hibernate.format.sql]': true
+    show-sql: true
+  output:
+    ansi:
+      enabled: always
+
+logging:
+  level:
+    '[shop.mtcoding.bank]': DEBUG
+    # 실제 배포는 마리아 DB 로 할것이나, 개발 중 또는 테스트 중일때는 h2 데이터베이스를 쓴다.
+    # MODE=MySQL 설정을 잡은 이유는 여기서 마리아 DB 는 설정으로 잡아줄 수 없는데,
+    # 애초에 마리아 DB 와 MySQL 의 문법이 같기 때문이다.
+    # 즉, 마리아 DB 에 맞는 쿼리로 h2 쿼리를 작성할 수 있다.
