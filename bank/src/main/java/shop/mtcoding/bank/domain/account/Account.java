@@ -2,7 +2,6 @@ package shop.mtcoding.bank.domain.account;
 
 import java.time.LocalDateTime;
 
-import org.h2.engine.User;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -19,6 +18,7 @@ import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import shop.mtcoding.bank.domain.user.User;
 
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "account_tb")
