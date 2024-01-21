@@ -31,6 +31,7 @@ public class SecurityConfig {
     @Bean
     // JWT 서버를 만들 예정이기 때문에 세션은 사용하지 않는다.(시큐리티 세션 사용)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        log.debug("디버그 : filterChain 빈 등록됨");
         // iframe 허용하지 않음(HTML 의 iframe을 허용하지 않는다. iframe 검색해볼것)
         http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
         http.csrf(csrf -> csrf.disable()); // enable 이면 포스트맨이 동작하지 못함
@@ -55,6 +56,8 @@ public class SecurityConfig {
     }
 
     public CorsConfigurationSource configurationSource() {
+        log.debug("디버그 : configurationSource cors 설정이 SecurityFilterChain 에 등록됨");
+
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*"); // GET, POST, PUT, DELETE, (자바스크립트 요청까지 허용)
