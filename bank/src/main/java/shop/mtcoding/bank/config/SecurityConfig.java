@@ -47,6 +47,13 @@ public class SecurityConfig {
         // 갑자기 브라우저에서 인증을 받기위한 팝업창을 띄우게된다.
         http.httpBasic(httpBasic -> httpBasic.disable());
 
+        // Exception 가로채기
+        http.exceptionHandling(handle -> handle.authenticationEntryPoint((request, response, authException) -> {
+            // response.setContentType("application/json; charset=utf-8");
+            response.setStatus(403);
+            response.getWriter().println("error");
+            // 예쁘게 메시지를 포장하는 공통적인 응답 DTO 를 만들어보자.
+        }));
         // 최근 공식문서에서는 ROLE_ 붙이지 않아도 됨
         http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/api/s/**").authenticated()
                 .requestMatchers("/api/admin/**").hasRole("" + UserEnum.ADMIN)
