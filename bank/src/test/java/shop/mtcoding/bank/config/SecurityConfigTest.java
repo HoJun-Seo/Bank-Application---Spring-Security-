@@ -1,5 +1,6 @@
 package shop.mtcoding.bank.config;
 
+import static org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,6 +19,7 @@ public class SecurityConfigTest {
     private MockMvc mockMvc;
 
     // 인증 테스트
+    // 서버는 일관성 있게 에러가 반환되어야 한다. 내가 모르는 에러가 프론트에 날아가지 않게 직접 제어해주야 한다.
     @Test
     public void autentication_test() throws Exception {
         // given
@@ -28,7 +30,9 @@ public class SecurityConfigTest {
         int httpStatusCode = resultActions.andReturn().getResponse().getStatus();
         System.out.println("테스트 : " + responseBody);
         System.out.println("테스트 : " + httpStatusCode);
+
         // then
+        assertThat(httpStatusCode).isEqualTo(401);
     }
 
     // 권한 테스트
@@ -37,7 +41,12 @@ public class SecurityConfigTest {
         // given
 
         // when
-
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/admin/hello"));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        int httpStatusCode = resultActions.andReturn().getResponse().getStatus();
+        System.out.println("테스트 : " + responseBody);
+        System.out.println("테스트 : " + httpStatusCode);
         // then
+        assertThat(httpStatusCode).isEqualTo(401);
     }
 }

@@ -13,7 +13,11 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import shop.mtcoding.bank.domain.user.UserEnum;
+import shop.mtcoding.bank.dto.ResponseDTO;
+import shop.mtcoding.bank.util.CustomResponseUtil;
 
 @Configuration
 public class SecurityConfig {
@@ -30,7 +34,7 @@ public class SecurityConfig {
 
     @Bean
     // JWT 서버를 만들 예정이기 때문에 세션은 사용하지 않는다.(시큐리티 세션 사용)
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public <T> SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         log.debug("디버그 : filterChain 빈 등록됨");
         // iframe 허용하지 않음(HTML 의 iframe을 허용하지 않는다. iframe 검색해볼것)
         http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
@@ -49,10 +53,7 @@ public class SecurityConfig {
 
         // Exception 가로채기
         http.exceptionHandling(handle -> handle.authenticationEntryPoint((request, response, authException) -> {
-            // response.setContentType("application/json; charset=utf-8");
-            response.setStatus(403);
-            response.getWriter().println("error");
-            // 예쁘게 메시지를 포장하는 공통적인 응답 DTO 를 만들어보자.
+            CustomResponseUtil.unAuthentication(response, "로그인을 진행해주세요");
         }));
         // 최근 공식문서에서는 ROLE_ 붙이지 않아도 됨
         http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/api/s/**").authenticated()
