@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserEnum;
 import shop.mtcoding.bank.domain.user.UserRepository;
@@ -48,6 +49,7 @@ public class UserService {
     }
 
     // 응답객체 생성
+    @ToString
     @Getter
     @Setter
     public static class JoinRespDto {
