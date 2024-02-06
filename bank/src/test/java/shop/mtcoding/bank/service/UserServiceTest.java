@@ -15,14 +15,14 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.user.User;
-import shop.mtcoding.bank.domain.user.UserEnum;
 import shop.mtcoding.bank.domain.user.UserRepository;
-import shop.mtcoding.bank.service.UserService.JoinReDto;
-import shop.mtcoding.bank.service.UserService.JoinRespDto;
+import shop.mtcoding.bank.dto.user.UserReqDto.JoinReqDto;
+import shop.mtcoding.bank.dto.user.UserRespDto.JoinRespDto;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
+public class UserServiceTest extends DummyObject {
 
     @InjectMocks
     private UserService userService;
@@ -36,33 +36,20 @@ public class UserServiceTest {
     @Test
     public void 회원가입_test() throws Exception {
         // given
-        JoinReDto joinReDto = new JoinReDto();
-        joinReDto.setUsername("ssar");
-        joinReDto.setPassword("1234");
-        joinReDto.setEmail("ssar@nate.com");
-        joinReDto.setFullname("쌀");
-
-        // stub : 가정법, 가설
-
-        // 어떠한 username 값이 매개변수로 findByUsername 메서드가 수행되어도 Optional.empty() 를 반환하라.
-        // 즉, 어떠한 username 값으로 회원정보를 찾아도, 중복여부와 상관없이 지정된 값을 반환해주라는 뜻이다.
-        when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
+        JoinReqDto joinReqDto = new JoinReqDto();
+        joinReqDto.setUsername("ssar");
+        joinReqDto.setPassword("1234");
+        joinReqDto.setEmail("ssar@nate.com");
+        joinReqDto.setFullname("쌀");
 
         // stub
-        User ssar = User.builder()
-                .id(1L)
-                .username("ssar")
-                .password("1234")
-                .email("ssar@nate.com")
-                .fullname("쌀")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .role(UserEnum.CUSTOMER)
-                .build();
+        when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
+
+        User ssar = newMockUser(1L, "ssar", "ssar");
         when(userRepository.save(any())).thenReturn(ssar);
 
         // when
-        JoinRespDto joinRespDto = userService.userRegister(joinReDto);
+        JoinRespDto joinRespDto = userService.userRegister(joinReqDto);
         System.out.println("테스트 : " + joinRespDto);
 
         // then
