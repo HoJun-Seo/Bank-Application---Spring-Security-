@@ -14,6 +14,16 @@ public class UserReqDto {
 
     @Getter
     @Setter
+    public static class LoginReqDto {
+        private String username;
+        private String password;
+
+        // 로그인 시 사용할 DTO 정의
+        // 이 DTO 는 컨트롤러 단에서 동작하는것이 아니기 때문에 유효성 검증이 불가능하다.
+    }
+
+    @Getter
+    @Setter
     public static class JoinReqDto {
 
         @Pattern(regexp = "^[a-zA-Z0-9]{2,20}$", message = "영문/숫자 2~20자 이내로 작성해주세요")
