@@ -50,7 +50,8 @@ public class SecurityConfig {
         http.httpBasic(httpBasic -> httpBasic.disable());
 
         // JWT 필터 적용
-        http.addFilterBefore(jwtAuthenticationFilter(http),
+        AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
+        http.addFilterBefore(new JwtAuthenticationFilter(authenticationManager),
                 UsernamePasswordAuthenticationFilter.class);
         // Exception 가로채기
         http.exceptionHandling(handle -> handle.authenticationEntryPoint((request, response, authException) -> {
@@ -83,10 +84,5 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
-    }
-
-    public JwtAuthenticationFilter jwtAuthenticationFilter(HttpSecurity http) {
-        AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
-        return new JwtAuthenticationFilter(authenticationManager);
     }
 }
