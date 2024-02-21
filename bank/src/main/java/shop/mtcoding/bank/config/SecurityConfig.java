@@ -4,15 +4,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import shop.mtcoding.bank.config.jwt.JwtAuthenticationFilter;
 import shop.mtcoding.bank.domain.user.UserEnum;
 import shop.mtcoding.bank.util.CustomResponseUtil;
 
@@ -26,8 +29,6 @@ public class SecurityConfig {
         log.debug("디버그 : BcryptPasswordEncoder 빈 등록됨");
         return new BCryptPasswordEncoder();
     }
-
-    // JWT 필터 등록이 필요함
 
     @Bean
     // JWT 서버를 만들 예정이기 때문에 세션은 사용하지 않는다.(시큐리티 세션 사용)
@@ -48,6 +49,9 @@ public class SecurityConfig {
         // 갑자기 브라우저에서 인증을 받기위한 팝업창을 띄우게된다.
         http.httpBasic(httpBasic -> httpBasic.disable());
 
+        // JWT 필터 적용
+        http.addFilterBefore(jwtAuthenticationFilter(http),
+                UsernamePasswordAuthenticationFilter.class);
         // Exception 가로채기
         http.exceptionHandling(handle -> handle.authenticationEntryPoint((request, response, authException) -> {
             CustomResponseUtil.unAuthentication(response, "로그인을 진행해주세요");
@@ -79,5 +83,10 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
+    }
+
+    public JwtAuthenticationFilter jwtAuthenticationFilter(HttpSecurity http) {
+        AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
+        return new JwtAuthenticationFilter(authenticationManager);
     }
 }
