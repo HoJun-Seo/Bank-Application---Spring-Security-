@@ -59,6 +59,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         } catch (Exception e) {
             // 시큐리티 로그인 과정 진행도중 익셉션 발생 시
             throw new InternalAuthenticationServiceException(e.getMessage());
+
+            // InternalAuthenticationServiceException 익셉션 발생 시
+            // unsuccessfulAuthentication 메서드가 간접적으로 호출됨
         }
     }
 
@@ -78,4 +81,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         LoginRespDto loginRespDto = new LoginRespDto(loginUser.getUser());
         CustomResponseUtil.success(response, loginRespDto);
     }
+
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+            AuthenticationException failed) throws IOException, ServletException {
+        CustomResponseUtil.unAuthentication(response, "로그인 실패");
+    }
+
 }
