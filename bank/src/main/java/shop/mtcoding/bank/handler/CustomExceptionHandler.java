@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import shop.mtcoding.bank.dto.ResponseDTO;
 import shop.mtcoding.bank.handler.ex.CustomApiException;
+import shop.mtcoding.bank.handler.ex.CustomForbiddenException;
 import shop.mtcoding.bank.handler.ex.CustomValidationException;
 
 @RestControllerAdvice
@@ -27,6 +28,12 @@ public class CustomExceptionHandler {
     @ExceptionHandler(CustomValidationException.class)
     public <T> ResponseEntity<?> validationApiException(CustomValidationException e) {
         log.error(e.getMessage());
-        return new ResponseEntity<>(new ResponseDTO<>(-1, e.getMessage(), e.getErrorMap()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ResponseDTO<>(-1, e.getMessage(), e.getErrorMap()), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(CustomForbiddenException.class)
+    public <T> ResponseEntity<?> forbiddenApiException(CustomValidationException e) {
+        log.error(e.getMessage());
+        return new ResponseEntity<>(new ResponseDTO<>(-1, e.getMessage(), null), HttpStatus.BAD_REQUEST);
     }
 }

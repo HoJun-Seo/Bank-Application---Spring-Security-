@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -74,7 +75,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         log.debug("디버그 : successfulAuthentication 호출됨");
         // loadUserByUsername 메서드의 호출 결과로 DB 에서 가져온 로그인된 유저 정보 가져오기
         LoginUser loginUser = (LoginUser) authResult.getPrincipal();
-        String jwtToken = JwtProcess.create(loginUser);
+        String jwtToken = JwtProcess.create(loginUser); // JWT 토큰 생성
         response.addHeader(JwtVO.HEADER, jwtToken);
 
         // 로그인 이후 응답으로 돌려줄 DTO 필요
@@ -85,7 +86,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException failed) throws IOException, ServletException {
-        CustomResponseUtil.unAuthentication(response, "로그인 실패");
+        CustomResponseUtil.fail(response, "로그인 실패", HttpStatus.UNAUTHORIZED);
     }
 
 }

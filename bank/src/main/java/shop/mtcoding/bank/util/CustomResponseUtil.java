@@ -2,6 +2,7 @@ package shop.mtcoding.bank.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -25,13 +26,13 @@ public class CustomResponseUtil {
         }
     }
 
-    public static <T> void unAuthentication(HttpServletResponse response, String msg) {
+    public static <T> void fail(HttpServletResponse response, String msg, HttpStatus httpStatus) {
         try {
             ObjectMapper om = new ObjectMapper();
             ResponseDTO<?> responseDTO = new ResponseDTO<T>(-1, msg, null);
             String responseBody = om.writeValueAsString(responseDTO);
             response.setContentType("application/json; charset=utf-8");
-            response.setStatus(401); // 응답코드 변경 403 -> 401
+            response.setStatus(httpStatus.value()); // 응답코드 403
             response.getWriter().println(responseBody);
         } catch (Exception e) {
             log.error("서버 파싱 에러");
