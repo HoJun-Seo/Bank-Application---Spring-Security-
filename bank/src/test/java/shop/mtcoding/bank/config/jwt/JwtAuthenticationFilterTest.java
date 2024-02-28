@@ -2,8 +2,13 @@ package shop.mtcoding.bank.config.jwt;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -11,10 +16,15 @@ import shop.mtcoding.bank.dto.user.UserReqDto.LoginReqDto;
 
 // 가짜환경(Mock) 으로 @SpringBoot 위에서 동작시켜야만 @Autowired 어노테이션 활용이 가능하다.
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK)
+@AutoConfigureMockMvc // MockMvc 의 의존성 주입을 위한 어노테이션
 public class JwtAuthenticationFilterTest {
 
     @Autowired
     private ObjectMapper om;
+    @Autowired
+    private MockMvc mvc;
+
+    // 유저 정보를 미리 삽입해야함
 
     @Test
     public void successfulAuthentication_test() throws Exception {
@@ -26,7 +36,12 @@ public class JwtAuthenticationFilterTest {
         loginReqDto.setPassword("1234");
         String requestBody = om.writeValueAsString(loginReqDto);
         System.out.println("테스트 : " + requestBody);
+
         // when
+        ResultActions resultActions = mvc.perform(
+                MockMvcRequestBuilders.post("/api/login").content(requestBody).contentType(MediaType.APPLICATION_JSON));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("테스트 : " + responseBody);
 
         // then
     }
