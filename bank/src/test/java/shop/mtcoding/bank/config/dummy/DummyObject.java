@@ -17,7 +17,7 @@ public class DummyObject {
         // id, 생성일자, 수정일자는 save 메서드가 동작하면 자동으로 User 객체에 생성되므로 제외시킨다.
         return User.builder()
                 .username(username)
-                .password("1234")
+                .password(encPassword)
                 .email(username + "@nate.com")
                 .fullname(fullname)
                 .role(UserEnum.CUSTOMER)
@@ -34,7 +34,7 @@ public class DummyObject {
         return User.builder()
                 .id(id)
                 .username(username)
-                .password("1234")
+                .password(encPassword)
                 .email(username + "@nate.com")
                 .fullname(fullname)
                 .createdAt(LocalDateTime.now())
