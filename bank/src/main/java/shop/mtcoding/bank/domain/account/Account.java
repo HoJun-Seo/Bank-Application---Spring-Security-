@@ -31,7 +31,8 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 20)
+    // 실제 구현을 위한것이 아닌 학습용이기에 편의성을 위해서 최대길이 4자로 설정
+    @Column(unique = true, nullable = false, length = 4)
     private Long number; // 계좌번호
 
     @Column(nullable = false, length = 4)
