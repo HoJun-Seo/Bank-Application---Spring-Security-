@@ -30,7 +30,7 @@ public class JwtProcessTest {
     public void verify_test() throws Exception {
         // given
         // create_test() 에서 만들어진 JWT 토큰값에서 "Bearer" 를 제외한 부분 모두 가져오기
-        String jwtToken = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiYW5rIiwiZXhwIjoxNzA5NjM4NDcwLCJpZCI6MSwicm9sZSI6IkNVU1RPTUVSIn0.jElA4BtaY6-fDwXnuE5QZDphqUv15ZrXlqx98EvuslWRrLmpHXOlnXCQHfYirj_KcfMRbPNtxFok8E_qNj7WxQ";
+        String jwtToken = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiYW5rIiwiZXhwIjoxNzEwMzEyNTIwLCJpZCI6MSwicm9sZSI6IkNVU1RPTUVSIn0.501YaQ8Xu5yqiaWXgq3GdnoFBPxvYvlEYc4bxIt5-HemwhjjTEaowWsy_Vy40601jDzUodz5K6ZEAWGIgD70WQ";
 
         // when
         LoginUser loginUser = JwtProcess.verify(jwtToken);

@@ -20,7 +20,7 @@ spring:
         ddl-auto: create
     properties:
         '[hibernate.default.batch.fetch.size]': 100
-        '[hibernate.format.sql]': true
+        '[hibernate.format_sql]': true
     show-sql: true
   output:
     ansi:
@@ -29,6 +29,7 @@ spring:
 logging:
   level:
     '[shop.mtcoding.bank]': DEBUG
+    '[org.hibernate.orm.jdbc.bind]': TRACE
     # 실제 배포는 마리아 DB 로 할것이나, 개발 중 또는 테스트 중일때는 h2 데이터베이스를 쓴다.
     # MODE=MySQL 설정을 잡은 이유는 여기서 마리아 DB 는 설정으로 잡아줄 수 없는데,
     # 애초에 마리아 DB 와 MySQL 의 문법이 같기 때문이다.
