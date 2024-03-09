@@ -13,16 +13,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.transaction.Transactional;
 import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.account.Account;
 import shop.mtcoding.bank.domain.account.AccountRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountReqDto.AccountSaveReqDto;
+import shop.mtcoding.bank.dto.account.AccountRespDto.AccountListRespDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto.AccountSaveRespDto;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
+@Transactional
 @ExtendWith(MockitoExtension.class)
 public class AccountServiceTest extends DummyObject {
 
@@ -63,5 +68,30 @@ public class AccountServiceTest extends DummyObject {
         System.out.println("테스트 : " + responseBody);
         // then
         assertThat(accountSaveRespDto.getNumber()).isEqualTo(1111L);
+    }
+
+    @Test
+    public void searchAccountListByUser_test() throws Exception {
+        // given
+        Long userId = 1L;
+        User user = newMockUser(userId, "ssar", "쌀");
+
+        List<Account> accountList = new ArrayList<>();
+        for (Long i = 1L; i < 3L; i++) {
+            accountList.add(newMockAccount(i, 1110L + i, 1000L * i, user));
+        }
+        accountList.stream()
+                .forEach((account) -> System.out
+                        .println("테스트 - id : " + account.getId() + ", number : " + account.getNumber()));
+
+        // stub 1
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        // stub 2
+        when(accountRepository.findByUser_id(userId)).thenReturn(accountList);
+        // when
+        AccountListRespDto accountListRespDto = accountService.searchAccountListByUser(userId);
+        // then
+        assertThat(accountListRespDto.getFullname()).isEqualTo(user.getFullname());
+        assertThat(accountListRespDto.getAccounts().size()).isEqualTo(2);
     }
 }

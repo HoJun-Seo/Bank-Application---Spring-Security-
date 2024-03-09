@@ -1,5 +1,6 @@
 package shop.mtcoding.bank.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import shop.mtcoding.bank.domain.account.AccountRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountReqDto.AccountSaveReqDto;
+import shop.mtcoding.bank.dto.account.AccountRespDto.AccountListRespDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto.AccountSaveRespDto;
 import shop.mtcoding.bank.handler.ex.CustomApiException;
 
@@ -21,6 +23,18 @@ public class AccountService {
 
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
+
+    // 사용자별 계좌목록 보기
+    public AccountListRespDto searchAccountListByUser(Long userId) {
+        User userPS = userRepository.findById(userId).orElseThrow(
+                () -> new CustomApiException("유저를 찾을 수 없습니다."));
+
+        // 사용자의 모든 계좌목록 조회
+        List<Account> accountListPS = accountRepository.findByUser_id(userPS.getId());
+
+        // 응답으로 돌려줄 객체 AccountListRespDto 생성 및 반환
+        return new AccountListRespDto(userPS, accountListPS);
+    }
 
     // 데이터베이스의 변경을 요구하는 메서드이기 때문에
     // @Transactional 어노테이션 등록

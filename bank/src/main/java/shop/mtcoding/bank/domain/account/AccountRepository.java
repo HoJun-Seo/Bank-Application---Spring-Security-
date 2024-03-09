@@ -3,6 +3,7 @@ package shop.mtcoding.bank.domain.account;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
 
@@ -11,4 +12,9 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     // LAZY 전략과 상관없이 조회하는 대로 곧장 User 객체를 가져와야 할 필요가 있을 경우 직접 쿼리를 작성해주어야 한다.
     // checkpoint : 추후 리팩토링 할 것
     Optional<Account> findByNumber(Long number);
+
+    // 본인 계좌목록 보기
+    // jpa query method
+    // select * from account where user_id = :id
+    List<Account> findByUser_id(Long id);
 }
