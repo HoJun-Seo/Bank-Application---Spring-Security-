@@ -1,6 +1,8 @@
 package shop.mtcoding.bank.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -22,6 +24,7 @@ import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountReqDto.AccountSaveReqDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto.AccountListRespDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto.AccountSaveRespDto;
+import shop.mtcoding.bank.handler.ex.CustomApiException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,5 +96,30 @@ public class AccountServiceTest extends DummyObject {
         // then
         assertThat(accountListRespDto.getFullname()).isEqualTo(user.getFullname());
         assertThat(accountListRespDto.getAccounts().size()).isEqualTo(2);
+    }
+
+    @Test
+    public void deleteAccount_test() {
+        // given
+        Long number = 1111L;
+        Long userId = 2L;
+
+        // stub
+        // userId 와 다른 값을 id 로 지정(계좌 소유자를 다르게 하기 위함)
+        User user = newMockUser(1L, "ssar", "쌀");
+        Account ssarAccount = newMockAccount(1L, number, 1000L, user);
+        when(accountRepository.findByNumber(any())).thenReturn(Optional.of(ssarAccount));
+
+        // accountRepository.deleteById 메서드의 경우 실행결과 반환값을 돌려주는 것이 아니므로
+        // 굳이 stub 을 만들어줄 필요가 없다.
+
+        // when
+
+        // then
+        // accountRepository.deleteById 메서드가 잘 터지는지에 대한 여부는 테스트할 필요가 없다.
+        // 어차피 JPA 개발진들이 알아서 잘 테스트하고 있을 것이다.
+        // 그러므로 계좌 소유자가 동일한지 아닌지에 대해 검증이 잘 되는지 확인해보는 테스트를 만들어보자.
+        assertThrows(CustomApiException.class, () -> accountService.deleteAccount(number, userId));
+
     }
 }

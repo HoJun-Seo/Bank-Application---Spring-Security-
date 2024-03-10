@@ -19,6 +19,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.mtcoding.bank.domain.user.User;
+import shop.mtcoding.bank.handler.ex.CustomApiException;
 
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "account_tb")
@@ -73,4 +74,9 @@ public class Account {
         this.updatedAt = updatedAt;
     }
 
+    public void checkOwner(Long userId) {
+        if (user.getId() != userId) {
+            throw new CustomApiException("계좌 소유자가 아닙니다.");
+        }
+    }
 }
