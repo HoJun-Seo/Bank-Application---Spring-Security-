@@ -1,5 +1,7 @@
 package shop.mtcoding.bank.web;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +22,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.account.Account;
@@ -44,9 +47,16 @@ public class AccountControllerTest extends DummyObject {
     @Autowired
     private AccountRepository accountRepository;
 
+    @Autowired
+    private EntityManager em; // PC 관리를 위한 EntityManager 객체 의존성 주입
+
     @BeforeEach
     public void setUp() {
         User user = userRepository.save(newUser("ssar", "쌀"));
+        User cos = userRepository.save(newUser("cos", "코스")); // 테스트 픽스쳐 추가
+        Account ssarAccount = accountRepository.save(newAccount(1111L, user));
+        Account cosAccount = accountRepository.save(newAccount(2222L, cos)); // 테스트 픽스쳐 추가
+        em.clear(); // PC 초기화
     }
 
     @WithUserDetails(value = "ssar", setupBefore = TestExecutionEvent.TEST_EXECUTION) // DB에서 username = ssar 로
@@ -82,7 +92,7 @@ public class AccountControllerTest extends DummyObject {
         System.out.println("테스트 - username : " + user.getUsername() + ", fullname : " + user.getFullname());
         for (Long i = 1L; i < 3L; i++) {
             AccountSaveReqDto accountSaveReqDto = new AccountSaveReqDto();
-            accountSaveReqDto.setNumber(1110L + i);
+            accountSaveReqDto.setNumber(1111L + i);
             accountSaveReqDto.setPassword(1234L);
             accountRepository.save(accountSaveReqDto.toEntity(user));
         }
@@ -92,5 +102,27 @@ public class AccountControllerTest extends DummyObject {
         System.out.println("테스트 : " + responseBody);
         // then
         resultActions.andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @WithUserDetails(value = "ssar", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void deleteAccount_test() throws Exception {
+        // given
+        Long number = 1111L; // 현재 로그인한 사용자가 가지고 있는 계좌의 계좌번호 정확히 입력
+
+        // when
+        ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.delete("/api/s/account/" + number));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("테스트 : " + responseBody);
+
+        // then
+        // checkOwner 에서 계좌의 소유자가 일치하지 않을 경우 오류 발생
+        // resultActions.andExpect(MockMvcResultMatchers.status().isBadRequest());
+
+        // 계좌가 잘 삭제된 것을 확인
+        assertThrows(CustomApiException.class,
+                () -> accountRepository.findByNumber(number)
+                        .orElseThrow(() -> new CustomApiException("계좌를 찾을 수 없습니다.")));
+        // Junit 테스트에서 delete 쿼리는 DB 관련으로 가장 마지막에 실행되면 콘솔상에서 확인이 되지 않는다.
     }
 }

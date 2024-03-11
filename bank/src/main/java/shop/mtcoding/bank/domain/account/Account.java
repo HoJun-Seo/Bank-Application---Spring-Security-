@@ -74,7 +74,11 @@ public class Account {
         this.updatedAt = updatedAt;
     }
 
+    // LAZY 로딩이어도 id 를 조회할 때는 select 쿼리가 날아가지 않는다.
     public void checkOwner(Long userId) {
+        String testUsername = user.getUsername(); // Account 테이블에서는 username 정보를 가지고 있지 않으므로 LAZY 로딩을 통해 User 정보를 가지고 오게
+                                                  // 된다.
+        System.out.println("테스트 : " + testUsername);
         if (user.getId() != userId) {
             throw new CustomApiException("계좌 소유자가 아닙니다.");
         }
