@@ -15,15 +15,16 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.account.Account;
 import shop.mtcoding.bank.domain.account.AccountRepository;
@@ -32,7 +33,7 @@ import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountReqDto.AccountSaveReqDto;
 import shop.mtcoding.bank.handler.ex.CustomApiException;
 
-@Transactional
+@Sql("classpath:db/teardown.sql") // sql 쿼리파일 적용
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK)
@@ -51,7 +52,7 @@ public class AccountControllerTest extends DummyObject {
     private EntityManager em; // PC 관리를 위한 EntityManager 객체 의존성 주입
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws Exception {
         User user = userRepository.save(newUser("ssar", "쌀"));
         User cos = userRepository.save(newUser("cos", "코스")); // 테스트 픽스쳐 추가
         Account ssarAccount = accountRepository.save(newAccount(1111L, user));

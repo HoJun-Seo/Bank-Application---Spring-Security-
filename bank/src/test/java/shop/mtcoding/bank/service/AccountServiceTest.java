@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@Transactional
 @ExtendWith(MockitoExtension.class)
 public class AccountServiceTest extends DummyObject {
 
