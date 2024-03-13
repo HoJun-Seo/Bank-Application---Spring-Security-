@@ -11,19 +11,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.persistence.EntityManager;
 import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.user.UserReqDto.LoginReqDto;
 
-@Transactional // 각 테스트 메서드가 종료될 때마다 데이터베이스가 롤백된다.
+@Sql("classpath:db/teardown.sql") // 각 테스트 메서드가 종료될 때마다 데이터베이스가 롤백된다.
 @ActiveProfiles("test") // application-test.yml 설정 적용
 // 가짜환경(Mock) 으로 @SpringBoot 위에서 동작시켜야만 @Autowired 어노테이션 활용이 가능하다.
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK)
@@ -36,11 +37,14 @@ public class JwtAuthenticationFilterTest extends DummyObject {
     private MockMvc mvc;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private EntityManager em;
 
     // 유저 정보를 미리 삽입해야함
     @BeforeEach
     public void setUp() throws Exception {
         userRepository.save(newUser("ssar", "쌀"));
+        em.clear();
     }
 
     @Test
