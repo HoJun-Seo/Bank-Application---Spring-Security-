@@ -17,7 +17,6 @@ import shop.mtcoding.bank.dto.account.AccountRespDto.AccountSaveRespDto;
 import shop.mtcoding.bank.handler.ex.CustomApiException;
 
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Service
 public class AccountService {
 
