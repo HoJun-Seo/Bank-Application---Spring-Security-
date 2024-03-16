@@ -84,4 +84,32 @@ public class RegexTest {
         boolean result = Pattern.matches("^[a-zA-Z0-9]{2,10}@[a-zA-Z0-9]{2,6}\\.[a-zA-Z]{2,3}$", fullname);
         System.out.println("테스트 : " + result);
     }
+
+    @Test
+    public void account_gubunTest1() throws Exception {
+        String gubun = "DEPOSIT"; // DEPOSIT 만 허용
+        boolean result = Pattern.matches("^(DEPOSIT)$", gubun);
+        System.out.println("테스트 : " + result);
+    }
+
+    @Test
+    public void account_gubunTest2() throws Exception {
+        String gubun = "TRANSFER"; // DEPOSIT, TRANSFER 둘 중 하나
+        boolean result = Pattern.matches("^(DEPOSIT|TRANSFER)$", gubun);
+        System.out.println("테스트 : " + result);
+    }
+
+    @Test
+    public void account_telTest1() throws Exception {
+        String tel = "010-3333-7777"; // '-' 포함하기
+        boolean result = Pattern.matches("^[0-9]{3}-[0-9]{4}-[0-9]{4}", tel);
+        System.out.println("테스트 : " + result);
+    }
+
+    @Test
+    public void account_telTest() throws Exception {
+        String tel = "01033337777"; // '-' 제외해서 넣기
+        boolean result = Pattern.matches("^[0-9]{11}", tel);
+        System.out.println("테스트 : " + result);
+    }
 }

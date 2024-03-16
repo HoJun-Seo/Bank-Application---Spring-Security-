@@ -83,5 +83,4 @@ public class Transaction {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
-
 }

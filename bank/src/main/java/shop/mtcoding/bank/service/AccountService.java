@@ -9,9 +9,14 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import shop.mtcoding.bank.domain.account.Account;
 import shop.mtcoding.bank.domain.account.AccountRepository;
+import shop.mtcoding.bank.domain.transaction.Transaction;
+import shop.mtcoding.bank.domain.transaction.TransactionEnum;
+import shop.mtcoding.bank.domain.transaction.TransactionRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
+import shop.mtcoding.bank.dto.account.AccountReqDto.AccountDepositReqDto;
 import shop.mtcoding.bank.dto.account.AccountReqDto.AccountSaveReqDto;
+import shop.mtcoding.bank.dto.account.AccountRespDto.AccountDepositRespDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto.AccountListRespDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto.AccountSaveRespDto;
 import shop.mtcoding.bank.handler.ex.CustomApiException;
@@ -22,6 +27,8 @@ public class AccountService {
 
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
+    // 거래내역을 남기기 위한 TransactionRepository 의존성 주입
+    private final TransactionRepository transactionRepository;
 
     // 사용자별 계좌목록 보기
     public AccountListRespDto searchAccountListByUser(Long userId) {
@@ -68,5 +75,39 @@ public class AccountService {
         // 3. 계좌 삭제
         accountRepository.deleteById(accountPS.getId());
         // 계좌 삭제만 하면 되기 때문에 응답으로 돌려줄 DTO 는 필요하지 않다.
+    }
+
+    /*
+     * ATM -> 누군가의 계좌로 입금
+     */
+    // 따로 인증이 필요없다.(ATM 기기에서 송금하는 것으로 간주하고 있기때문)
+    @Transactional
+    public AccountDepositRespDto accountDeposit(AccountDepositReqDto accountDepositReqDto) {
+        // 0원 체크(amount == 0)
+        // validation 과정에서 검증해도 무관하나, 서비스에서도 한번 해보자.
+        if (accountDepositReqDto.getAmount() <= 0) {
+            throw new CustomApiException("0원 이하의 금액을 입금할 수 없습니다.");
+        }
+        // 입금 계좌가 존재하는지 확인
+        Account depositAccountPS = accountRepository.findByNumber(accountDepositReqDto.getNumber())
+                .orElseThrow(() -> new CustomApiException("계좌를 찾을 수 없습니다."));
+        // 입금(해당 계좌의 balance 값 조정 - update query - 더티 체킹이 발생함)
+        depositAccountPS.deposit(accountDepositReqDto.getAmount());
+        // 거래내역 남기기
+        Transaction transaction = Transaction.builder()
+                .depositAccount(depositAccountPS)
+                .withdrawAccount(null) // ATM 기기에서 입금한다는 설정이므로 출금 계좌는 없음
+                .depositAccountBalance(depositAccountPS.getBalance())
+                .withdrawAccountBalance(null)
+                .amount(accountDepositReqDto.getAmount())
+                .gubun(TransactionEnum.DEPOSIT)
+                .sender("ATM")
+                .receiver(accountDepositReqDto.getNumber() + "") // 계좌번호를 문자열 타입으로 변환
+                .tel(accountDepositReqDto.getTel())
+                .build();
+
+        Transaction transactionPS = transactionRepository.save(transaction);
+
+        return new AccountDepositRespDto(depositAccountPS, transactionPS);
     }
 }
