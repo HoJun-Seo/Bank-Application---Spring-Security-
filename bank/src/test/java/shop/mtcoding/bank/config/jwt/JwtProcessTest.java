@@ -11,14 +11,18 @@ import shop.mtcoding.bank.domain.user.UserEnum;
 
 public class JwtProcessTest {
 
+    // JWT 토큰 생성 및 반환 메서드
+    private String createToken(User user) {
+        return JwtProcess.create(new LoginUser(user));
+    }
+
     @Test
     public void create_test() throws Exception {
         // given
         User user = User.builder().id(1L).role(UserEnum.CUSTOMER).build();
-        LoginUser loginUser = new LoginUser(user);
 
         // when
-        String jwtToken = JwtProcess.create(loginUser);
+        String jwtToken = createToken(user);
         System.out.println(" 테스트 : " + jwtToken);
 
         // then
@@ -29,12 +33,12 @@ public class JwtProcessTest {
     @Test
     public void verify_test() throws Exception {
         // given
-        // create_test() 에서 만들어진 JWT 토큰값에서 "Bearer" 를 제외한 부분 모두 가져오기
-        String jwtToken = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiYW5rIiwiZXhwIjoxNzEwOTE4MTA5LCJpZCI6MSwicm9sZSI6IkNVU1RPTUVSIn0._FVMtAwG8XhF_KfJcwcSBKf3Cr8mjEppZvu_XLcV8AmFnmGtMbVDp9IMmYHlYgr-_PfPquahx_WbQkt8gIuRFQ";
+        User user = User.builder().id(1L).role(UserEnum.CUSTOMER).build();
 
         // when
+        // Jwt 생성, 반환 및, "Bearer " 문자열 제거
+        String jwtToken = createToken(user).replace(JwtVO.TOKEN_PREFIX, "");
         LoginUser loginUser = JwtProcess.verify(jwtToken);
-        // System.out.println(" 테스트 : " + loginUser.getUser().getId());
 
         // then
         assertThat(loginUser.getUser().getId()).isEqualTo(1L);
