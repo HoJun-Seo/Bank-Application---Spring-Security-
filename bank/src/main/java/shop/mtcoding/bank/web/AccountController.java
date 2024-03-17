@@ -16,7 +16,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import shop.mtcoding.bank.config.auth.LoginUser;
 import shop.mtcoding.bank.dto.ResponseDTO;
+import shop.mtcoding.bank.dto.account.AccountReqDto.AccountDepositReqDto;
 import shop.mtcoding.bank.dto.account.AccountReqDto.AccountSaveReqDto;
+import shop.mtcoding.bank.dto.account.AccountRespDto.AccountDepositRespDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto.AccountListRespDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto.AccountSaveRespDto;
 import shop.mtcoding.bank.service.AccountService;
@@ -53,6 +55,13 @@ public class AccountController {
     public ResponseEntity<?> deleteAccount(@PathVariable Long number, @AuthenticationPrincipal LoginUser loginUser) {
         accountService.deleteAccount(number, loginUser.getUser().getId());
         return new ResponseEntity<>(new ResponseDTO<>(1, "계좌 삭제완료", null), HttpStatus.OK);
+    }
+
+    @PostMapping("/account/deposit")
+    public ResponseEntity<?> depositAccount(@RequestBody @Valid AccountDepositReqDto accountDepositReqDto,
+            BindingResult bindingResult) {
+        AccountDepositRespDto accountDepositRespDto = accountService.accountDeposit(accountDepositReqDto);
+        return new ResponseEntity<>(new ResponseDTO<>(1, "계좌입급 완료", accountDepositRespDto), HttpStatus.OK);
     }
 
 }

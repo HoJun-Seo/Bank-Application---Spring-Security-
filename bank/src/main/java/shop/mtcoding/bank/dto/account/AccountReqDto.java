@@ -43,7 +43,7 @@ public class AccountReqDto {
     public static class AccountDepositReqDto {
 
         @NotNull
-        @Digits(integer = 3, fraction = 4)
+        @Digits(integer = 4, fraction = 4)
         private Long number;
         @NotNull
         private Long amount;
