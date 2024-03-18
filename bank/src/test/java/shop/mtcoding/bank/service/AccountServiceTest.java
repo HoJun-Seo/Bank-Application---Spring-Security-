@@ -18,9 +18,14 @@ import jakarta.transaction.Transactional;
 import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.account.Account;
 import shop.mtcoding.bank.domain.account.AccountRepository;
+import shop.mtcoding.bank.domain.transaction.Transaction;
+import shop.mtcoding.bank.domain.transaction.TransactionEnum;
+import shop.mtcoding.bank.domain.transaction.TransactionRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
+import shop.mtcoding.bank.dto.account.AccountReqDto.AccountDepositReqDto;
 import shop.mtcoding.bank.dto.account.AccountReqDto.AccountSaveReqDto;
+import shop.mtcoding.bank.dto.account.AccountRespDto.AccountDepositRespDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto.AccountListRespDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto.AccountSaveRespDto;
 import shop.mtcoding.bank.handler.ex.CustomApiException;
@@ -40,6 +45,9 @@ public class AccountServiceTest extends DummyObject {
 
     @Mock
     private AccountRepository accountRepository;
+
+    @Mock
+    private TransactionRepository transactionRepository;
 
     // @Mock 어노테이션이 달려있는 객체들은 모두 @InjectMocks 어노테이션이 붙어있는 객체에 주입된다(DI).
 
@@ -119,5 +127,52 @@ public class AccountServiceTest extends DummyObject {
         // 그러므로 계좌 소유자가 동일한지 아닌지에 대해 검증이 잘 되는지 확인해보는 테스트를 만들어보자.
         assertThrows(CustomApiException.class, () -> accountService.deleteAccount(number, userId));
 
+    }
+
+    @Test
+    public void depositAccount_test() {
+        // given
+        AccountDepositReqDto accountDepositReqDto = new AccountDepositReqDto();
+        accountDepositReqDto.setNumber(1111L);
+        accountDepositReqDto.setAmount(100L);
+        accountDepositReqDto.setGubun("DEPOSIT");
+        accountDepositReqDto.setTel("01022227777");
+
+        User user = newMockUser(1L, "ssar", "쌀");
+        Account account = newMockAccount(1L, 1111L, 1000L, user);
+        Transaction transaction = newMockTransaction(1L, null, account, accountDepositReqDto.getAmount(), null,
+                account.getBalance() + accountDepositReqDto.getAmount(), TransactionEnum.DEPOSIT, "ATM",
+                account.getNumber() + "",
+                accountDepositReqDto.getTel());
+
+        // stub 1
+        when(accountRepository.findByNumber(any())).thenReturn(Optional.of(account));
+
+        // stub 2
+        when(transactionRepository.save(any())).thenReturn(transaction);
+        // when
+        AccountDepositRespDto accountDepositRespDto = accountService.accountDeposit(accountDepositReqDto);
+        // then
+        assertThat(accountDepositRespDto.getNumber()).isEqualTo(account.getNumber());
+        assertThat(accountDepositRespDto.getTransactionDto().getAmount()).isEqualTo(accountDepositReqDto.getAmount());
+        assertThat(accountDepositRespDto.getTransactionDto().getGubun()).isEqualTo(TransactionEnum.DEPOSIT.getValue());
+        assertThat(accountDepositRespDto.getTransactionDto().getTel()).isEqualTo(accountDepositReqDto.getTel());
+        System.out
+                .println(
+                        "테스트 - 거래이후 입금계좌 잔액 : " + accountDepositRespDto.getTransactionDto().getDepositAccountBalance());
+        System.out.println("테스트 - 거래이후 입금계좌 잔액 예상 : " + (account.getBalance()));
+        /*
+         * accountRepository.findByNumber 메서드의 결과값으로 위에서 만든 Account 객체를 돌려받게 해두었는데,
+         * accountService.accountDeposit 메서드가 실행되는 과정에서 Account 객체의 deposit 메서드가 실행되었고
+         * 이 과정에서 위에서 만들어둔 Account 객체의 balance 값이 실제로 변경되어버림
+         * (Account.deposit 메서드는 void 타입이기 때문에 stub 으로 거짓 반환값을 만들어주기가 힘들다.)
+         * 그렇기 때문에 거래이후 잔액을 검증할 때 account 객체의 잔액에 입금요청 금액을 더한값으로 검증하는 것이 아니라,
+         * account 객체의 잔액 그 자체로 검증해야함(deposit 메서드 호출로 인해 실제로 객체의 잔액 값이 변경되었기 때문)
+         */
+        assertThat(accountDepositRespDto.getTransactionDto().getDepositAccountBalance())
+                .isEqualTo(account.getBalance());
+        assertThat(accountDepositRespDto.getTransactionDto().getSender()).isEqualTo("ATM");
+        assertThat(accountDepositRespDto.getTransactionDto().getReceiver())
+                .isEqualTo(accountDepositReqDto.getNumber() + "");
     }
 }

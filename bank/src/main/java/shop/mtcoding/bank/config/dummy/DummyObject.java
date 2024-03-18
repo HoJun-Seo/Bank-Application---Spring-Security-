@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import shop.mtcoding.bank.domain.account.Account;
+import shop.mtcoding.bank.domain.transaction.Transaction;
+import shop.mtcoding.bank.domain.transaction.TransactionEnum;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserEnum;
 
@@ -60,6 +62,45 @@ public class DummyObject {
                 .password(1234L)
                 .balance(balance)
                 .user(user)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    protected Transaction newTransaction(Account withdrawAccount, Account depositAccount, Long amount,
+            Long withdrawAccountBalance, Long depositAccountBalance, TransactionEnum gubun, String sender,
+            String receiver, String tel) {
+
+        return Transaction.builder()
+                .withdrawAccount(withdrawAccount)
+                .depositAccount(depositAccount)
+                .amount(amount)
+                .withdrawAccountBalance(withdrawAccountBalance)
+                .depositAccountBalance(depositAccountBalance)
+                .gubun(gubun)
+                .sender(sender)
+                .receiver(receiver)
+                .tel(tel)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    protected Transaction newMockTransaction(Long id, Account withdrawAccount, Account depositAccount, Long amount,
+            Long withdrawAccountBalance, Long depositAccountBalance, TransactionEnum gubun, String sender,
+            String receiver, String tel) {
+
+        return Transaction.builder()
+                .id(id)
+                .withdrawAccount(withdrawAccount)
+                .depositAccount(depositAccount)
+                .amount(amount)
+                .withdrawAccountBalance(withdrawAccountBalance)
+                .depositAccountBalance(depositAccountBalance)
+                .gubun(gubun)
+                .sender(sender)
+                .receiver(receiver)
+                .tel(tel)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
