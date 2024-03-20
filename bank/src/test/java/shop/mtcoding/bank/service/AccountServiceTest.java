@@ -144,65 +144,43 @@ public class AccountServiceTest extends DummyObject {
         accountDepositReqDto.setTel("01022227777");
 
         // stub 1
-        User user = newMockUser(1L, "ssar", "쌀");
-        Account account1 = newMockAccount(1L, 1111L, 1000L, user);
+        User user1 = newMockUser(1L, "ssar", "쌀");
+        Account account1 = newMockAccount(1L, 1111L, 1000L, user1);
         when(accountRepository.findByNumber(any())).thenReturn(Optional.of(account1));
 
         // stub 2
-        Account account2 = newMockAccount(1L, 1111L, 1000L, user);
+        User user2 = newMockUser(1L, "ssar", "쌀");
+        Account account2 = newMockAccount(1L, 1111L, 1000L, user2);
         Transaction transaction = newMockDepositTransaction(1L, account2);
         when(transactionRepository.save(any())).thenReturn(transaction);
 
-        /*
-         * 두개의 stub 에 하나의 객체를 동시에 사용하면 객체의 값이 꼬이게 되는 경우가 있다.
-         * 지금 현재의 테스트만 봐도 하나의 account 객체를 이용해 두 개의 stub 에 모두 활용하면
-         * 하나의 account 객체에 대해 Transaction 객체가 만들어질때 deposit 메서드가 한번,
-         * 그리고 accountService.accountDeposit 메서드에서 deposit 메서드가 또 한번 실행되어
-         * 하나의 account 객체에 총 두번의 deposit 메서드가 호출되어서 입금이 두번되는 경우가 생긴다.
-         * 
-         * 그런데 위와 같이 각각의 stub 에 대해 필요한 객체를 따로따로 만들어주면
-         * accountService.accountDeposit 메서드 호출때는 account1 객체에 대해 deposit 이 이루어지고
-         * transaction 객체가 생성될 때 호출되는 deposit 메서드는 account2 객체에 대해 이루어지기 때문에
-         * 하나의 객체에 반복적으로 똑같은 비즈니스 메서드가 호출되는 것을 막을 수 있다.
-         * 
-         * 이를 통해 응답으로 돌아온 AccountDepositRespDto 객체와 transaction 객체간의 입금후 잔액 비교뿐만이 아니라
-         * stub 으로 사용한 account 객체에 대해서도 입금후 잔액 비교가 가능해진다.
-         */
         // when
         AccountDepositRespDto accountDepositRespDto = accountService.accountDeposit(accountDepositReqDto);
         // then
-        assertThat(accountDepositRespDto.getNumber()).isEqualTo(account1.getNumber());
-        assertThat(accountDepositRespDto.getTransactionDto().getAmount()).isEqualTo(accountDepositReqDto.getAmount());
-        assertThat(accountDepositRespDto.getTransactionDto().getGubun()).isEqualTo(TransactionEnum.DEPOSIT.getValue());
-        assertThat(accountDepositRespDto.getTransactionDto().getTel()).isEqualTo(accountDepositReqDto.getTel());
-        assertThat(accountDepositRespDto.getTransactionDto().getDepositAccountBalance())
-                .isEqualTo(transaction.getDepositAccountBalance());
-        assertThat(accountDepositRespDto.getTransactionDto().getDepositAccountBalance())
-                .isEqualTo(account1.getBalance());
-        assertThat(accountDepositRespDto.getTransactionDto().getDepositAccountBalance())
-                .isEqualTo(account2.getBalance());
-        System.out.println(
-                "테스트 - 응답 객체 입금후 잔액 : " + accountDepositRespDto.getTransactionDto().getDepositAccountBalance());
-        System.out.println(
-                "테스트 - 거래내역 객체 입금 후 잔액 : " + transaction.getDepositAccountBalance());
-        System.out.println(
-                "테스트 - account1 객체 입금 후 잔액(accountDeposit 메서드에서 deposit 메서드 호출) : "
-                        + account1.getBalance());
-        System.out.println(
-                "테스트 - account2 객체 입금 후 잔액(transaction 객체 생성 시 내부에서 deposit 메서드 호출) : "
-                        + account2.getBalance());
+        assertThat(accountDepositRespDto.getTransactionDto().getDepositAccountBalance()).isEqualTo(1100L);
+    }
 
-        /*
-         * accountDeposit 메서드 내부에서 account 객체에 대해 deposit 메서드가 호출되기는 하나,
-         * 호출됨으로서 변경된 account 객체의 balance 값은 AccountDepositRespDto 객체가 만들어질 때 반영되지 않음
-         * 반환받은 가짜 transaction 객체가 가지고있는 입금계좌 잔액이 반영될 뿐,
-         * 이때 가짜 transaction 객체가 생성될 때 이미 내부에서 account 객체에 대한 deposit 이 완료된 이후의 잔액이 저장됨
-         * 결국 이미 deposit 이 완료된 계좌 잔액을 들고 있는 transaction 객체를 통해 AccountDepositRespDto 객체가
-         * 생성되는 것.
-         */
-        assertThat(accountDepositRespDto.getTransactionDto().getSender()).isEqualTo("ATM");
-        assertThat(accountDepositRespDto.getTransactionDto().getReceiver())
-                .isEqualTo(accountDepositReqDto.getNumber() + "");
+    // 위의 계좌입금 서비스 테스트 코드 간소화(책임 소재 명확하게 하기)
+    /*
+     * 계좌입금 서비스에서는 계좌입금 기능이 잘 동작했는지, 0원 처리가 잘 되었는지만 확인하면 됐지,
+     * findByNumber 가 잘 동작했는지, Transaction 객체가 잘 만들어졌는지 여부는 굳이 확인할 필요는 없음
+     * (transaction 객체가 잘 만들어졌는지는 컨트롤러를 테스트할 때도 확인 가능함)
+     */
+    @Test
+    public void depositAccount_simplify() {
+        // given
+        // user 객체도 굳이 필요없음
+        Account account = newMockAccount(1L, 1111L, 1000L, null);
+        Long amount = 100L;
+
+        // when
+        if (amount <= 0L) {
+            throw new CustomApiException("0원 이하의 금액을 입금할 수 없습니다.");
+        }
+        account.deposit(100L);
+
+        // then
+        assertThat(account.getBalance()).isEqualTo(1100L);
     }
 
     @Test
