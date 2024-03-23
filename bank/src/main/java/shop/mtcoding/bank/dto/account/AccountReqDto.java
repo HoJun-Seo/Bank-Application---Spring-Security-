@@ -54,4 +54,20 @@ public class AccountReqDto {
         @Pattern(regexp = "^[0-9]{11}")
         private String tel; // 전화번호(누가 입급했는지 확인용)
     }
+
+    @Getter
+    @Setter
+    public static class AccountWithdrawReqDto {
+        @NotNull
+        @Digits(integer = 4, fraction = 4)
+        private Long number;
+        @NotNull
+        @Digits(integer = 4, fraction = 4)
+        private Long password;
+        @NotNull
+        private Long amount;
+        @NotEmpty
+        @Pattern(regexp = "^(WITHDRAW)$")
+        private String gubun;
+    }
 }

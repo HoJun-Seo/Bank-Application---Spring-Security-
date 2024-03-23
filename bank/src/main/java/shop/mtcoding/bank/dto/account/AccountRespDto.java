@@ -127,4 +127,47 @@ public class AccountRespDto {
             }
         }
     }
+
+    // 입금요청에 대한 응답객체와 구성이 거의 비슷하다고 해도 재사용해서는 안된다.
+    // 나중에 만약 출금할 때 요구사항의 변경으로 인해 DTO 의 구성이 달라져야 하는데, DTO 를 공유하고 있을 경우
+    // 수정이 잘못되면 크게 꼬인다. 그렇기 때문에 독립적으로 응답 객체를 만들어주어야 한다.
+    @Getter
+    @Setter
+    public static class AccountWithdrawRespDto {
+
+        private Long id;
+        private Long number;
+        private Long balance; // 출금이후 잔액
+
+        private TransactionDto transactionDto;
+
+        public AccountWithdrawRespDto(Account account, Transaction transaction) {
+            this.id = account.getId();
+            this.number = account.getNumber();
+            this.balance = account.getBalance();
+            this.transactionDto = new TransactionDto(transaction);
+        }
+
+        @Getter
+        @Setter
+        // 응답으로 돌려줄 거래내역 DTO
+        public class TransactionDto {
+            private Long id; // 트랜잭션 id 값
+            private String gubun; // "WITHDRAW"
+            private String sender; // "출금 계좌번호"
+            private String receiver; // "ATM"
+            private Long amount; // 출금 금액
+
+            private String createdAt; // 출금 날짜
+
+            public TransactionDto(Transaction transaction) {
+                this.id = transaction.getId();
+                this.gubun = transaction.getGubun().getValue();
+                this.sender = transaction.getSender();
+                this.receiver = transaction.getReceiver();
+                this.amount = transaction.getAmount();
+                this.createdAt = CustomDateUtil.toStringFormat(transaction.getCreatedAt());
+            }
+        }
+    }
 }

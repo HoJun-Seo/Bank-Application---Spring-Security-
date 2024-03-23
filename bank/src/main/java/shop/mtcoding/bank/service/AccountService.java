@@ -16,9 +16,11 @@ import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountReqDto.AccountDepositReqDto;
 import shop.mtcoding.bank.dto.account.AccountReqDto.AccountSaveReqDto;
+import shop.mtcoding.bank.dto.account.AccountReqDto.AccountWithdrawReqDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto.AccountDepositRespDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto.AccountListRespDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto.AccountSaveRespDto;
+import shop.mtcoding.bank.dto.account.AccountRespDto.AccountWithdrawRespDto;
 import shop.mtcoding.bank.handler.ex.CustomApiException;
 
 @RequiredArgsConstructor
@@ -109,5 +111,44 @@ public class AccountService {
         Transaction transactionPS = transactionRepository.save(transaction);
 
         return new AccountDepositRespDto(depositAccountPS, transactionPS);
+    }
+
+    // 로그인이 되어있어야 하기 때문에 userId 를 받는다.
+    @Transactional
+    public AccountWithdrawRespDto accountWithdraw(AccountWithdrawReqDto accountWithdrawReqDto, Long userId) {
+        // 0원 체크
+        if (accountWithdrawReqDto.getAmount() <= 0) {
+            throw new CustomApiException("0원 이하의 금액을 출금할 수 없습니다.");
+        }
+
+        // 출금계좌 확인
+        Account withdrawAccountPS = accountRepository.findByNumber(accountWithdrawReqDto.getNumber())
+                .orElseThrow(() -> new CustomApiException("계좌를 찾을 수 없습니다."));
+
+        // 출금계좌 소유자 확인(로그인한 사람과 계좌 소유자가 동일한지 체크)
+        withdrawAccountPS.checkOwner(userId);
+        // 출금계좌 비밀번호 확인
+        withdrawAccountPS.checkSamePassword(accountWithdrawReqDto.getPassword());
+        // 출금계좌 잔액 확인
+        withdrawAccountPS.checkBalance(accountWithdrawReqDto.getAmount());
+        // 출금하기
+        withdrawAccountPS.withdraw(accountWithdrawReqDto.getAmount());
+        // 거래내역 남기기(내 계좌에서 ATM으로 출금)
+        // 전화번호 정보(tel) 는 필요하지 않음
+        Transaction transaction = Transaction.builder()
+                .depositAccount(null)
+                .withdrawAccount(withdrawAccountPS)
+                .depositAccountBalance(null)
+                .withdrawAccountBalance(withdrawAccountPS.getBalance()) // 내 계좌 잔액은 볼 수 있어야 함, 응답객체에 @JsonIgnore가 들어가면
+                                                                        // 안됨
+                .amount(accountWithdrawReqDto.getAmount())
+                .gubun(TransactionEnum.WITHDRAW)
+                .sender(accountWithdrawReqDto.getNumber() + "")
+                .receiver("ATM")
+                .build();
+
+        Transaction transactionPS = transactionRepository.save(transaction);
+        // 응답객체 반환하기
+        return new AccountWithdrawRespDto(withdrawAccountPS, transaction);
     }
 }

@@ -25,6 +25,7 @@ import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountReqDto.AccountDepositReqDto;
 import shop.mtcoding.bank.dto.account.AccountReqDto.AccountSaveReqDto;
+import shop.mtcoding.bank.dto.account.AccountReqDto.AccountWithdrawReqDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto.AccountDepositRespDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto.AccountListRespDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto.AccountSaveRespDto;
@@ -212,5 +213,30 @@ public class AccountServiceTest extends DummyObject {
         when(accountRepository.findByNumber(any())).thenReturn(Optional.empty());
         // then
         assertThrows(CustomApiException.class, () -> accountService.accountDeposit(accountDepositReqDto));
+    }
+
+    @Test
+    public void withdrawAccount_test() throws Exception {
+        // given
+        Long amount = 100L;
+
+        User user = newMockUser(1L, "ssar", "쌀");
+        Account account = newMockAccount(1L, 1111L, 1000L, user);
+        // when
+        // 0원 체크
+        if (amount <= 0L) {
+            throw new CustomApiException("0원 이하의 금액을 출금할 수 없습니다.");
+        }
+        // 출금계좌 소유자 확인
+        account.checkOwner(user.getId());
+        // 비밀번호 확인
+        account.checkSamePassword(1234L); // newMockAccount 메서드 내부에서 설정하는 계좌 비밀번호
+        // 잔액 확인
+        account.checkBalance(amount);
+        // 출금하기
+        account.withdraw(amount);
+
+        // then
+        assertThat(account.getBalance()).isEqualTo(900L);
     }
 }

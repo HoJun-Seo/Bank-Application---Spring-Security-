@@ -87,4 +87,20 @@ public class Account {
     public void deposit(Long amount) {
         balance += amount;
     }
+
+    public void checkSamePassword(Long password) {
+        if (this.password.longValue() != password.longValue()) {
+            throw new CustomApiException("계좌 비밀번호 검증에 실패하였습니다.");
+        }
+    }
+
+    public void checkBalance(Long amount) {
+        if (this.balance.longValue() < amount.longValue()) {
+            throw new CustomApiException("계좌 잔액이 부족합니다.");
+        }
+    }
+
+    public void withdraw(Long amount) {
+        balance = balance - amount;
+    }
 }
