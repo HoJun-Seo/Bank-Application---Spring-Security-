@@ -170,4 +170,48 @@ public class AccountRespDto {
             }
         }
     }
+
+    @Getter
+    @Setter
+    public static class AccountTransferRespDto {
+        private Long id; // 출금계좌 id
+        private Long number; // 출금계좌 계좌번호
+        private Long balance; // 출금계좌 잔액
+
+        private TransactionDto transactionDto;
+
+        public AccountTransferRespDto(Account account, Transaction transaction) {
+            this.id = account.getId();
+            this.number = account.getNumber();
+            this.balance = account.getBalance();
+            this.transactionDto = new TransactionDto(transaction);
+        }
+
+        @Getter
+        @Setter
+        // 응답으로 돌려줄 거래내역 DTO
+        public class TransactionDto {
+            private Long id; // 트랜잭션 id 값
+            private String gubun; // "TRANSFER"
+            private String sender; // "출금 계좌번호"
+            private String receiver; // "입금 계좌번호"
+            private Long amount; // 이체 금액
+
+            // 입금 계좌잔액은 필요없음, 테스트 용도로만 사용
+            @JsonIgnore
+            private Long depositAccountBalance;
+
+            private String createdAt; // 출금 날짜
+
+            public TransactionDto(Transaction transaction) {
+                this.id = transaction.getId();
+                this.gubun = transaction.getGubun().getValue();
+                this.sender = transaction.getSender();
+                this.receiver = transaction.getReceiver();
+                this.amount = transaction.getAmount();
+                this.depositAccountBalance = transaction.getDepositAccountBalance();
+                this.createdAt = CustomDateUtil.toStringFormat(transaction.getCreatedAt());
+            }
+        }
+    }
 }
