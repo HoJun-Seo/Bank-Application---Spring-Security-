@@ -79,7 +79,8 @@ public class Account {
         String testUsername = user.getUsername(); // Account 테이블에서는 username 정보를 가지고 있지 않으므로 LAZY 로딩을 통해 User 정보를 가지고 오게
                                                   // 된다.
         System.out.println("테스트 : " + testUsername);
-        if (user.getId() != userId) {
+        // 낮은수라고 해도 Long 타입끼리 비교를 할 때는 longValue() 메서드를 붙여주어야 한다.
+        if (user.getId().longValue() != userId.longValue()) {
             throw new CustomApiException("계좌 소유자가 아닙니다.");
         }
     }
