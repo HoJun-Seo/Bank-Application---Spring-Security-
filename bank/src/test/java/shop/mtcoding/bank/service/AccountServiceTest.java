@@ -220,16 +220,18 @@ public class AccountServiceTest extends DummyObject {
     public void withdrawAccount_test() throws Exception {
         // given
         Long amount = 100L;
+        Long userId = 1000L;
 
-        User user = newMockUser(1L, "ssar", "쌀");
+        User user = newMockUser(1000L, "ssar", "쌀");
         Account account = newMockAccount(1L, 1111L, 1000L, user);
         // when
         // 0원 체크
         if (amount <= 0L) {
             throw new CustomApiException("0원 이하의 금액을 출금할 수 없습니다.");
         }
+        System.out.println("userId : " + user.getId());
         // 출금계좌 소유자 확인
-        account.checkOwner(user.getId());
+        account.checkOwner(userId);
         // 비밀번호 확인
         account.checkSamePassword(1234L); // newMockAccount 메서드 내부에서 설정하는 계좌 비밀번호
         // 잔액 확인
