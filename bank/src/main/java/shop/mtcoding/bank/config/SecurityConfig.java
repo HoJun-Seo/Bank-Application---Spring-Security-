@@ -91,7 +91,7 @@ public class SecurityConfig {
         // 자바 또는 스위프트와 같은 언어로 요청이 들어오기 때문에 애초에 cors 에 걸리지 않는다.
         // 그렇기 때문에 휴대폰 앱에 대한 ip 허용 여부는 고려되지 않는다.
         configuration.setAllowCredentials(true); // 클라이언트에서 쿠키 요청 허용(지금은 굳이 필요없음)
-
+        configuration.addExposedHeader("Authorization"); // 헤더에 Authorization 속성값 노출
         // 모든 주소 요청에 위의 설정을 추가한다.
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

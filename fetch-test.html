@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>로그인 페이지</h1>
+    <hr>
+    <form>
+        <input type="text" id="username"> <br/>
+        <input type="password" id="password"> <br/>
+        <button type="button" onclick="login()">로그인</button>
+    </form>
+
+    <script>
+        // await 지점을 기억한채로 login 함수의 스택을 빠져나와라
+        // 즉, login 메서드가 실행되다가 중간에 await 를 만나면 해당 포인트를 기억한채로 일단 login 메서드를 빠져나온다는 뜻이다.
+        async function login(){
+            let userDto = {
+                username: document.querySelector("#username").value,
+                password: document.querySelector("#password").value
+            }
+            console.log(userDto);
+
+            let userJson = JSON.stringify(userDto);
+            console.log(userJson);
+
+            let r1 = await fetch("http://localhost:8081/api/login", {
+                method: "post",
+                body: userJson,
+                headers : {
+                    "Content-Type" : "application/json; charset=utf-8"
+                }
+            });
+
+            console.log("Authorization : ", r1.headers.get("Authorization"));
+            let token = r1.headers.get("Authorization");
+
+            localStorage.setItem("token", token);
+            sessionStorage.setItem("token", token);
+            
+            let r2 = await r1.json(); // fetch 반환값 json 으로 파싱
+            console.log(r2);
+        }
+    </script>
+
+    <!--
+        async 가 동작하여 await 를 만나는 순간 login 메서드를 잠시 빠져나오게 되는데,
+        이때 login 함수가 종료된것으로 취급되기 때문에 함수 내부에 만들어져 있던 지역변수들은 모두 메모리에서 삭제된다.
+        그런데 await 키워드가 붙은 코드를 동작시키려면 지역변수들을 기억해놓아야 하기 때문에 이 값들을 메모리에 복사해둔다.
+        이를 두고 캡처링이라고 한다.
+        
+        일단 login 함수 내부에 있는 값들을 메모리에 복사해두고 난 다음 login 함수를 빠져나와서
+        이후에 작성되어있는 코드들이 모두 실행되고 난 후 스레드가 할 일이 없어지면 await 가 붙어있던 fetch 로 돌아와서 그동안 실행이 완료된 결과값을 r1 변수에 적재한다.
+    -->
+</body>
+</html>
