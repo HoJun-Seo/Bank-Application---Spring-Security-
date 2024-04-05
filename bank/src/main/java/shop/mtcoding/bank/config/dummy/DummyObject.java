@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import shop.mtcoding.bank.domain.account.Account;
+import shop.mtcoding.bank.domain.account.AccountRepository;
 import shop.mtcoding.bank.domain.transaction.Transaction;
 import shop.mtcoding.bank.domain.transaction.TransactionEnum;
 import shop.mtcoding.bank.domain.user.User;
@@ -87,5 +88,21 @@ public class DummyObject {
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
+    }
+
+    protected Transaction newWithdrawTransaction(Account account, AccountRepository accountRepository) {
+
+        return null;
+    }
+
+    protected Transaction newDepositTransaction(Account account, AccountRepository accountRepository) {
+
+        return null;
+    }
+
+    protected Transaction newTransferTransaction(Account account1, Account account2,
+            AccountRepository accountRepository) {
+
+        return null;
     }
 }
