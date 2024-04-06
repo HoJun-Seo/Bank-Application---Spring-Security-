@@ -91,18 +91,68 @@ public class DummyObject {
     }
 
     protected Transaction newWithdrawTransaction(Account account, AccountRepository accountRepository) {
+        account.withdraw(100L); // 현재 잔액이 1000원이었다면 900원으로 잔금이 변해야함
 
-        return null;
+        // 서비스 레이어에서 값을 변경한것이 아니기 때문에 더티 체킹이 되지않음
+        // 그렇기 때문에 직접 상태변화가 발생한 객체를 직접 저장해주어야 함
+        if (accountRepository != null) {
+            accountRepository.save(account);
+        }
+        Transaction transaction = Transaction.builder()
+                .withdrawAccount(account)
+                .depositAccount(null)
+                .withdrawAccountBalance(account.getBalance())
+                .depositAccountBalance(null)
+                .amount(100L)
+                .gubun(TransactionEnum.WITHDRAW)
+                .sender(account.getNumber() + "")
+                .receiver("ATM")
+                .build();
+        return transaction;
     }
 
     protected Transaction newDepositTransaction(Account account, AccountRepository accountRepository) {
+        account.deposit(100L); // 현재 잔액이 1000원이었다면 1100원으로 잔금이 변해야함
 
-        return null;
+        // 서비스 레이어에서 값을 변경한것이 아니기 때문에 더티 체킹이 되지않음
+        // 그렇기 때문에 직접 상태변화가 발생한 객체를 직접 저장해주어야 함
+        if (accountRepository != null) {
+            accountRepository.save(account);
+        }
+        Transaction transaction = Transaction.builder()
+                .withdrawAccount(null)
+                .depositAccount(account)
+                .withdrawAccountBalance(null)
+                .depositAccountBalance(account.getBalance())
+                .amount(100L)
+                .gubun(TransactionEnum.DEPOSIT)
+                .sender("ATM")
+                .receiver(account.getNumber() + "")
+                .tel("01022227777")
+                .build();
+        return transaction;
     }
 
-    protected Transaction newTransferTransaction(Account account1, Account account2,
+    protected Transaction newTransferTransaction(Account withdrawAccount, Account depositAccount,
             AccountRepository accountRepository) {
-
-        return null;
+        withdrawAccount.withdraw(100L);
+        depositAccount.deposit(100L);
+        // 서비스 레이어에서 값을 변경한것이 아니기 때문에 더티 체킹이 되지않음
+        // 그렇기 때문에 직접 상태변화가 발생한 객체를 직접 저장해주어야 함
+        if (accountRepository != null) {
+            accountRepository.save(withdrawAccount);
+            accountRepository.save(depositAccount);
+        }
+        Transaction transaction = Transaction.builder()
+                .withdrawAccount(withdrawAccount)
+                .depositAccount(depositAccount)
+                .withdrawAccountBalance(withdrawAccount.getBalance())
+                .depositAccountBalance(depositAccount.getBalance())
+                .amount(100L)
+                .gubun(TransactionEnum.TRANSFER)
+                .sender(withdrawAccount.getNumber() + "")
+                .receiver(depositAccount.getNumber() + "")
+                .build();
+        return transaction;
     }
 }

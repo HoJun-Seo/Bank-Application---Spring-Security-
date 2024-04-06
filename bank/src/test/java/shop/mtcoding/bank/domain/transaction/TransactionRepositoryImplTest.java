@@ -1,15 +1,21 @@
 package shop.mtcoding.bank.domain.transaction;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
 
+import jakarta.persistence.EntityManager;
 import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.account.Account;
 import shop.mtcoding.bank.domain.account.AccountRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 
+@ActiveProfiles("test")
 // Repository 테스트이기 @DataJpaTest 어노테이션을 사용하면 Mock 을 사용할 필요가없다.
 @DataJpaTest // DB 관련된 Bean 이 다 올라온다.
 public class TransactionRepositoryImplTest extends DummyObject {
@@ -26,9 +32,37 @@ public class TransactionRepositoryImplTest extends DummyObject {
     @Autowired
     private AccountRepository accountRepository;
 
+    @Autowired
+    private EntityManager em;
+
     @BeforeEach
     public void setUp() {
+        autoincrementReset(); // 기본키 증가값 초기화 메서드 호출
         dataSetting();
+    }
+
+    @Test
+    public void dataJpa_test_1() {
+        List<Transaction> transactionList = transactionRepository.findAll();
+        transactionList.forEach((transaction) -> {
+            System.out.println("테스트 - 거래내역 id : " + transaction.getId());
+            System.out.println("테스트 - 출금 : " + transaction.getSender());
+            System.out.println("테스트 - 입금 : " + transaction.getReceiver());
+            System.out.println("테스트 - 구분값 : " + transaction.getGubun());
+            System.out.println("테스트 : ==================================");
+        });
+    }
+
+    @Test
+    public void dataJpa_test_2() {
+        List<Transaction> transactionList = transactionRepository.findAll();
+        transactionList.forEach((transaction) -> {
+            System.out.println("테스트 - 거래내역 id : " + transaction.getId());
+            System.out.println("테스트 - 출금 : " + transaction.getSender());
+            System.out.println("테스트 - 입금 : " + transaction.getReceiver());
+            System.out.println("테스트 - 구분값 : " + transaction.getGubun());
+            System.out.println("테스트 : ==================================");
+        });
     }
 
     private void dataSetting() {
@@ -52,5 +86,13 @@ public class TransactionRepositoryImplTest extends DummyObject {
                 .save(newTransferTransaction(ssarAccount1, loveAccount, accountRepository));
         Transaction transferTransaction3 = transactionRepository
                 .save(newTransferTransaction(cosAccount, ssarAccount1, accountRepository));
+    }
+
+    // 기본키 증가값 초기화 메서드
+    // autoincrement 전략으로 인한 기본키 증가값도 초기화가 되어야 테스트에 용이하다.
+    private void autoincrementReset() {
+        em.createNativeQuery("ALTER TABLE user_tb ALTER COLUMN id RESTART WITH 1").executeUpdate();
+        em.createNativeQuery("ALTER TABLE account_tb ALTER COLUMN id RESTART WITH 1").executeUpdate();
+        em.createNativeQuery("ALTER TABLE transaction_tb ALTER COLUMN id RESTART WITH 1").executeUpdate();
     }
 }
