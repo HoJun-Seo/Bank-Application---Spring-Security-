@@ -39,6 +39,7 @@ public class TransactionRepositoryImplTest extends DummyObject {
     public void setUp() {
         autoincrementReset(); // 기본키 증가값 초기화 메서드 호출
         dataSetting();
+        em.clear(); // Repository 테스트에서 필수!
     }
 
     @Test
@@ -62,7 +63,7 @@ public class TransactionRepositoryImplTest extends DummyObject {
     @Test
     public void findTransactionList_withdraw_test() throws Exception {
         // given
-        Long accountId = 1L;
+        Long accountId = 2L; // accountId = 2L 로 변경
         // when
         List<Transaction> transactionListPS = transactionRepository.findTransactionList(accountId, "WITHDRAW", 0);
         transactionListPS.forEach((t) -> {
@@ -72,6 +73,9 @@ public class TransactionRepositoryImplTest extends DummyObject {
             System.out.println("테스트 - 입금 계좌 : " + t.getReceiver());
             System.out.println("테스트 - 입금계좌 잔액 : " + t.getDepositAccountBalance());
             System.out.println("테스트 - 출금계좌 잔액 : " + t.getWithdrawAccountBalance());
+            System.out.println("테스트 - 출금계좌 잔액 : " + t.getWithdrawAccount().getUser().getFullname()); // 출금계좌 주인 fullname
+            System.out.println("테스트 - 출금계좌 잔액 : " + t.getWithdrawAccount().getBalance()); // 출금계좌 최종 잔액
+                                                                                          // 출력
             System.out.println("테스트 : =================================");
         });
         // then
@@ -121,7 +125,7 @@ public class TransactionRepositoryImplTest extends DummyObject {
 
     private void dataSetting() {
         User ssar = userRepository.save(newUser("ssar", "쌀"));
-        User cos = userRepository.save(newUser("cos", "코스,"));
+        User cos = userRepository.save(newUser("cos", "코스"));
         User love = userRepository.save(newUser("love", "러브"));
         User admin = userRepository.save(newUser("admin", "관리자"));
 
