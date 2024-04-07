@@ -93,8 +93,8 @@ public class DummyObject {
     protected Transaction newWithdrawTransaction(Account account, AccountRepository accountRepository) {
         account.withdraw(100L); // 현재 잔액이 1000원이었다면 900원으로 잔금이 변해야함
 
-        // 서비스 레이어에서 값을 변경한것이 아니기 때문에 더티 체킹이 되지않음
-        // 그렇기 때문에 직접 상태변화가 발생한 객체를 직접 저장해주어야 함
+        // Repository Test 에서는 더티체킹이 수행됨
+        // Controller Test 에서는 더티체킹 안됨
         if (accountRepository != null) {
             accountRepository.save(account);
         }
@@ -114,8 +114,8 @@ public class DummyObject {
     protected Transaction newDepositTransaction(Account account, AccountRepository accountRepository) {
         account.deposit(100L); // 현재 잔액이 1000원이었다면 1100원으로 잔금이 변해야함
 
-        // 서비스 레이어에서 값을 변경한것이 아니기 때문에 더티 체킹이 되지않음
-        // 그렇기 때문에 직접 상태변화가 발생한 객체를 직접 저장해주어야 함
+        // Repository Test 에서는 더티체킹이 수행됨
+        // Controller Test 에서는 더티체킹 안됨
         if (accountRepository != null) {
             accountRepository.save(account);
         }
@@ -137,8 +137,9 @@ public class DummyObject {
             AccountRepository accountRepository) {
         withdrawAccount.withdraw(100L);
         depositAccount.deposit(100L);
-        // 서비스 레이어에서 값을 변경한것이 아니기 때문에 더티 체킹이 되지않음
-        // 그렇기 때문에 직접 상태변화가 발생한 객체를 직접 저장해주어야 함
+
+        // Repository Test 에서는 더티체킹이 수행됨
+        // Controller Test 에서는 더티체킹 안됨
         if (accountRepository != null) {
             accountRepository.save(withdrawAccount);
             accountRepository.save(depositAccount);
