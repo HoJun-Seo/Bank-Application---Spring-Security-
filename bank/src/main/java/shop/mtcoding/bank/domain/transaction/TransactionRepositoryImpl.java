@@ -33,7 +33,7 @@ public class TransactionRepositoryImpl implements Dao {
         sql += "select t from Transaction t "; // JPQL
 
         if (gubun.equals("WITHDRAW")) {
-            sql += "join t.withdrawAccount wa "; // fetch 제거
+            sql += "join fetch t.withdrawAccount wa ";
             sql += "where t.withdrawAccount.id = :withdrawAccountId";
         } else if (gubun.equals("DEPOSIT")) {
             sql += "join fetch t.depositAccount da ";
