@@ -2,6 +2,7 @@ package shop.mtcoding.bank.domain.transaction;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +64,7 @@ public class TransactionRepositoryImplTest extends DummyObject {
     @Test
     public void findTransactionList_withdraw_test() throws Exception {
         // given
-        Long accountId = 2L; // accountId = 2L 로 변경
+        Long accountId = 1L;
         // when
         List<Transaction> transactionListPS = transactionRepository.findTransactionList(accountId, "WITHDRAW", 0);
         transactionListPS.forEach((t) -> {
@@ -75,10 +76,13 @@ public class TransactionRepositoryImplTest extends DummyObject {
             System.out.println("테스트 - 출금계좌 잔액 : " + t.getWithdrawAccountBalance());
             System.out.println("테스트 - 출금계좌 잔액 : " + t.getWithdrawAccount().getUser().getFullname()); // 출금계좌 주인 fullname
             System.out.println("테스트 - 출금계좌 잔액 : " + t.getWithdrawAccount().getBalance()); // 출금계좌 최종 잔액
-                                                                                          // 출력
             System.out.println("테스트 : =================================");
         });
+
         // then
+        // accountId = 1L 인 계좌의 출금내역 중 세번째 출금당시 계좌의 잔액 확인
+        // (index : 0, 1, 2 -> index 2 가 3번째 출금 거래내역임)
+        assertThat(transactionListPS.get(2).getWithdrawAccountBalance()).isEqualTo(700L);
     }
 
     @Test
